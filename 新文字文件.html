@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>饗食雲端 - 專業訂餐系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
+        .cart-panel { transition: transform 0.3s ease-in-out; }
+        .service-card.active { border-color: #f59e0b; background-color: #fffbeb; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- 導航欄 -->
+    <nav class="sticky top-0 z-50 bg-white shadow-md px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center space-x-2 text-orange-500 text-2xl font-bold">
+            <i class="fas fa-utensils"></i>
+            <span>饗食雲端</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button onclick="toggleCart()" class="relative p-2 bg-orange-100 text-orange-600 rounded-full hover:bg-orange-200 transition">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+            </button>
+            <button class="bg-gray-100 p-2 rounded-full hover:bg-gray-200"><i class="fas fa-user"></i></button>
+        </div>
+    </nav>
+
+    <!-- 主內容區 -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        
+        <!-- 服務切換區 -->
+        <section class="mb-10">
+            <h2 class="text-xl font-bold mb-4">選擇服務類型</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div id="service-delivery" onclick="setService('delivery')" class="service-card active cursor-pointer p-4 border-2 rounded-xl flex items-center space-x-4 transition">
+                    <div class="bg-orange-100 p-3 rounded-lg text-orange-500 text-2xl"><i class="fas fa-motorcycle"></i></div>
+                    <div>
+                        <div class="font-bold">美食外送</div>
+                        <div class="text-sm text-gray-500">30 分鐘內送達</div>
+                    </div>
+                </div>
+                <div id="service-pickup" onclick="setService('pickup')" class="service-card cursor-pointer p-4 border-2 bg-white rounded-xl flex items-center space-x-4 transition">
+                    <div class="bg-blue-100 p-3 rounded-lg text-blue-500 text-2xl"><i class="fas fa-walking"></i></div>
+                    <div>
+                        <div class="font-bold">到店自取</div>
+                        <div class="text-sm text-gray-500">免運費，專屬優惠</div>
+                    </div>
+                </div>
+                <div id="service-booking" onclick="setService('booking')" class="service-card cursor-pointer p-4 border-2 bg-white rounded-xl flex items-center space-x-4 transition">
+                    <div class="bg-green-100 p-3 rounded-lg text-green-500 text-2xl"><i class="fas fa-calendar-check"></i></div>
+                    <div>
+                        <div class="font-bold">線上訂位</div>
+                        <div class="text-sm text-gray-500">預約您的美好時光</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 熱門餐點分類 -->
+        <section class="mb-8">
+            <div class="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
+                <button class="px-6 py-2 bg-orange-500 text-white rounded-full whitespace-nowrap">全部</button>
+                <button class="px-6 py-2 bg-white border hover:border-orange-500 rounded-full whitespace-nowrap transition">日式料理</button>
+                <button class="px-6 py-2 bg-white border hover:border-orange-500 rounded-full whitespace-nowrap transition">美式漢堡</button>
+                <button class="px-6 py-2 bg-white border hover:border-orange-500 rounded-full whitespace-nowrap transition">義大利麵</button>
+                <button class="px-6 py-2 bg-white border hover:border-orange-500 rounded-full whitespace-nowrap transition">台式美味</button>
+                <button class="px-6 py-2 bg-white border hover:border-orange-500 rounded-full whitespace-nowrap transition">健康沙拉</button>
+            </div>
+        </section>
+
+        <!-- 餐點列表 -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="menu-list">
+            <!-- JavaScript 將在此注入內容 -->
+        </section>
+    </main>
+
+    <!-- 購物車側欄 -->
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl z-[60] transform translate-x-full cart-panel flex flex-col">
+        <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+            <h3 class="text-xl font-bold">您的訂單</h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-black text-2xl">&times;</button>
+        </div>
+        <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- 購物車清單 -->
+            <div class="text-center py-20 text-gray-400">
+                <i class="fas fa-shopping-basket text-5xl mb-4"></i>
+                <p>您的購物車是空的</p>
+            </div>
+        </div>
+        <div class="p-6 border-t bg-gray-50">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-gray-600">總計金額</span>
+                <span id="cart-total" class="text-2xl font-bold text-orange-600">$0</span>
+            </div>
+            <button onclick="checkout()" class="w-full bg-orange-500 text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition shadow-lg">
+                確認結帳
+            </button>
+        </div>
+    </div>
+
+    <!-- 遮罩層 -->
+    <div id="overlay" onclick="toggleCart()" class="fixed inset-0 bg-black opacity-50 z-[55] hidden"></div>
+
+    <script>
+        // 模擬數據
+        const menuData = [
+            { id: 1, name: '極上和牛堡', price: 280, rating: 4.8, img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80', tag: '熱門' },
+            { id: 2, name: '松露義大利麵', price: 320, rating: 4.9, img: 'https://images.unsplash.com/photo-1473093226795-af9932fe5856?auto=format&fit=crop&w=300&q=80', tag: '主廚推薦' },
+            { id: 3, name: '招牌滷肉飯套餐', price: 150, rating: 4.7, img: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80', tag: '經典' },
+            { id: 4, name: '酪梨鮮蝦沙拉', price: 220, rating: 4.5, img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=300&q=80', tag: '健康' },
+            { id: 5, name: '北海道拉麵', price: 260, rating: 4.6, img: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=300&q=80', tag: '新品' },
+            { id: 6, name: '美式總匯披薩', price: 450, rating: 4.4, img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=300&q=80', tag: '多人分享' }
+        ];
+
+        let cart = [];
+        let currentService = 'delivery';
+
+        // 初始化
+        window.onload = () => {
+            renderMenu();
+        };
+
+        function renderMenu() {
+            const menuList = document.getElementById('menu-list');
+            menuList.innerHTML = menuData.map(item => `
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group border">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <span class="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 rounded text-xs">${item.tag}</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg">${item.name}</h3>
+                            <span class="text-orange-500"><i class="fas fa-star text-sm"></i> ${item.rating}</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-xl font-bold text-gray-800">$${item.price}</span>
+                            <button onclick="addToCart(${item.id})" class="bg-orange-100 text-orange-600 p-2 rounded-lg hover:bg-orange-500 hover:text-white transition">
+                                <i class="fas fa-plus"></i> 加入購物車
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setService(service) {
+            currentService = service;
+            document.querySelectorAll('.service-card').forEach(card => card.classList.remove('active'));
+            document.getElementById(`service-${service}`).classList.add('active');
+            
+            // 如果是訂位服務，彈出一個簡單的模擬提示
+            if (service === 'booking') {
+                showToast('您已選擇線上訂位，請挑選日期');
+            }
+        }
+
+        function addToCart(id) {
+            const product = menuData.find(item => item.id === id);
+            const existing = cart.find(item => item.id === id);
+            
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            
+            updateCartUI();
+            showToast(`已將 ${product.name} 加入購物車`);
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartItems = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartTotal = document.getElementById('cart-total');
+
+            cartCount.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="text-center py-20 text-gray-400">
+                        <i class="fas fa-shopping-basket text-5xl mb-4"></i>
+                        <p>您的購物車是空的</p>
+                    </div>`;
+                cartTotal.innerText = `$0`;
+                return;
+            }
+
+            cartItems.innerHTML = cart.map(item => `
+                <div class="flex items-center justify-between bg-white p-3 rounded-lg border">
+                    <div class="flex items-center space-x-3">
+                        <img src="${item.img}" class="w-12 h-12 rounded object-cover">
+                        <div>
+                            <div class="font-bold text-sm">${item.name}</div>
+                            <div class="text-xs text-gray-500">$${item.price} x ${item.quantity}</div>
+                        </div>
+                    </div>
+                    <button onclick="removeFromCart(${item.id})" class="text-red-400 hover:text-red-600">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartTotal.innerText = `$${total}`;
+        }
+
+        function toggleCart() {
+            const drawer = document.getElementById('cart-drawer');
+            const overlay = document.getElementById('overlay');
+            drawer.classList.toggle('translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                showToast('請先選擇餐點');
+                return;
+            }
+            const serviceName = {
+                'delivery': '外送',
+                'pickup': '自取',
+                'booking': '訂位'
+            }[currentService];
+            
+            const total = document.getElementById('cart-total').innerText;
+            alert(`訂單已送出！\n服務：${serviceName}\n金額：${total}\n感謝您的訂購！`);
+            cart = [];
+            updateCartUI();
+            toggleCart();
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-2xl z-[100] animate-bounce";
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
